@@ -16,7 +16,7 @@ MetHod：POST
   status(int)：代碼
   msg(string)：訊息
   data(object)：
-  回傳方式：JSON
+回傳方式：JSON
 ```
 
 ```
