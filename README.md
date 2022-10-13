@@ -5,9 +5,6 @@
 |---|-----|
 |1001|xxxxxxxxxxxx|
 
-```
-```
-
 ## QuestionReply - 問卷回覆
 ```
 MetHod：POST
