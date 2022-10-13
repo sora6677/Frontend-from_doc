@@ -8,7 +8,7 @@ MetHod：POST
 傳入JSON：
   ReplyData(json)：回覆內容
 傳入範例：
-  data={"ReplyData":{"1":"A"}}
+  data={"ReplyData":[{"1":"A"},{"2":"B"}]}
 ```
 
 ```
