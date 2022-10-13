@@ -4,7 +4,7 @@
 ```
 MetHod：POST
 傳入參數：
-	data：JSON
+  data：JSON
 傳入JSON：
   ReplyData(json)：回覆內容
 傳入範例：
@@ -13,15 +13,15 @@ MetHod：POST
 
 ```
 回傳參數：
-	status(int)：代碼
-	msg(string)：訊息
-	data(object)：
-	回傳方式：JSON
+  status(int)：代碼
+  msg(string)：訊息
+  data(object)：
+  回傳方式：JSON
 ```
 
 ```
 成功範例：
-{"status":200,"msg":"成功","data":{}}
+  {"status":200,"msg":"成功","data":{}}
 失敗範例：
-{"status":1001,"msg":"傳入資料異常","data":{}}
+  {"status":1001,"msg":"傳入資料異常","data":{}}
 ```
