@@ -36,165 +36,172 @@ try
     $sPre = $oDB->prepare($sSQL);
     $sPre->execute();
     $aRow = $sPre->fetch(PDO::FETCH_ASSOC);
-    $aJsonQuest = json_decode($aRow['question_data']);
-    foreach($aJsonQuest as $n => $qd)
+    if($aRow)
     {
-        $id = isset($qd->id) ? $qd->id : '';
-        $type = isset($qd->type) ? $qd->type : 0;
-        $max_answer = isset($qd->max_answer) ? $qd->max_answer : '';
-        $aQuest[$id]['type'] = $type;
+        $aJsonQuest = json_decode($aRow['question_data']);
+        foreach($aJsonQuest as $n => $qd)
+        {
+            $id = isset($qd->id) ? $qd->id : '';
+            $type = isset($qd->type) ? $qd->type : 0;
+            $max_answer = isset($qd->max_answer) ? $qd->max_answer : '';
+            $aQuest[$id]['type'] = $type;
 
-        if($type == 1 || $type == 2)
-        {
-            $aQuest[$id]['answer'] = isset($max_answer) ? array_fill(0,$max_answer,0) : '';
-            $aQuest[$id]['percentage'] = isset($max_answer) ? array_fill(0,$max_answer,0) : '';
-            $aQuest[$id]['fill'] = isset($max_answer) ? array_fill(1,$max_answer,array()) : '';
-            $aQuest[$id]['count'] = 0;
-        }
-        else if($type == 3)
-        {
-            $aQuest[$id]['count'] = 0;
-            $aQuest[$id]['fill'] = array();
-        }
-        else if($type == 4)
-        {
-            if(!empty($max_answer[0]))
+            if($type == 1 || $type == 2)
             {
-                foreach($max_answer[0] as $sid => $rang)
-                {
-                    $aQuest[$id]['item'][$sid]['answer'] = array_fill(0,$rang,0);
-                    $aQuest[$id]['item'][$sid]['percentage'] = array_fill(0,$rang,0);
-                    $aQuest[$id]['item'][$sid]['fill'] = array_fill(1,$rang,array());
-                    $aQuest[$id]['count'] = 0;
-                }
+                $aQuest[$id]['answer'] = isset($max_answer) ? array_fill(0,$max_answer,0) : '';
+                $aQuest[$id]['percentage'] = isset($max_answer) ? array_fill(0,$max_answer,0) : '';
+                $aQuest[$id]['fill'] = isset($max_answer) ? array_fill(1,$max_answer,array()) : '';
+                $aQuest[$id]['count'] = 0;
             }
-        }
-    }
-
-    # 查詢回覆
-    $aData = array();
-    $sSQL ='SELECT  `reply_id`,
-                    `reply_data`
-            FROM    `questionnaire_reply`
-            WHERE   `question_id` = 1';
-    $sPre = $oDB->prepare($sSQL);
-    $sPre->execute();
-    while($aRow = $sPre->fetch(PDO::FETCH_ASSOC))
-    {
-        $aJson = json_decode($aRow['reply_data']);
-
-        # 累加回覆
-        foreach($aJson as $n => $d)
-        {
-            $id = $d->id;
-            $type = $d->type;
-            $select = isset($d->answer->select) ? $d->answer->select : '';
-            $fill = isset($d->answer->fill) ? $d->answer->fill : '';
-            if(!isset($aQuest[$id])) continue;
-            $aQuest[$id]['count']++;
-
-            if($type == 1)
+            else if($type == 3)
             {
-                # 單選
-                $select--;
-                isset($aQuest[$id]['answer'][$select]) ? $aQuest[$id]['answer'][$select]++ : '';
-                ($fill != '' && !empty($fill)) ? $aQuest[$id]['fill'][($select + 1)][] = $fill : '';
+                $aQuest[$id]['count'] = 0;
+                $aQuest[$id]['fill'] = array();
             }
-            else if($type == 2)
+            else if($type == 4)
             {
-                # 複選
-                foreach($select as $nn => $number)
+                if(!empty($max_answer[0]))
                 {
-                    $number--;
-                    isset($aQuest[$id]['answer'][$number]) ? $aQuest[$id]['answer'][$number]++ : '';
-                }
-
-                if($fill != '' && !empty($fill))
-                {
-                    foreach($fill as $number => $v)
+                    foreach($max_answer[0] as $sid => $rang)
                     {
-                        $aQuest[$id]['fill'][$number][] = $v;
+                        $aQuest[$id]['item'][$sid]['answer'] = array_fill(0,$rang,0);
+                        $aQuest[$id]['item'][$sid]['percentage'] = array_fill(0,$rang,0);
+                        $aQuest[$id]['item'][$sid]['fill'] = array_fill(1,$rang,array());
+                        $aQuest[$id]['count'] = 0;
                     }
                 }
             }
-            else if($type == 3)
+        }
+
+        # 查詢回覆
+        $aData = array();
+        $sSQL ='SELECT  `reply_id`,
+                        `reply_data`
+                FROM    `questionnaire_reply`
+                WHERE   `question_id` = 1';
+        $sPre = $oDB->prepare($sSQL);
+        $sPre->execute();
+        while($aRow = $sPre->fetch(PDO::FETCH_ASSOC))
+        {
+            $aJson = json_decode($aRow['reply_data']);
+
+            # 累加回覆
+            foreach($aJson as $n => $d)
             {
-                # 填寫
-                ($fill != '' && !empty($fill)) ? $aQuest[$id]['fill'][] = $fill : '';
-            }
-            else if($type == 4)
-            {
-                # 多題單選
-                foreach($select[0] as $sid => $number)
+                $id = $d->id;
+                $type = $d->type;
+                $select = isset($d->answer->select) ? $d->answer->select : '';
+                $fill = isset($d->answer->fill) ? $d->answer->fill : '';
+                if(!isset($aQuest[$id])) continue;
+                $aQuest[$id]['count']++;
+
+                if($type == 1)
                 {
-                    $number--;
-                    isset($aQuest[$id]['item'][$sid]['answer'][$number]) ? $aQuest[$id]['item'][$sid]['answer'][$number]++ : '';
+                    # 單選
+                    $select--;
+                    isset($aQuest[$id]['answer'][$select]) ? $aQuest[$id]['answer'][$select]++ : '';
+                    ($fill != '' && !empty($fill)) ? $aQuest[$id]['fill'][($select + 1)][] = $fill : '';
                 }
+                else if($type == 2)
+                {
+                    # 複選
+                    foreach($select as $nn => $number)
+                    {
+                        $number--;
+                        isset($aQuest[$id]['answer'][$number]) ? $aQuest[$id]['answer'][$number]++ : '';
+                    }
+
+                    if($fill != '' && !empty($fill))
+                    {
+                        foreach($fill as $number => $v)
+                        {
+                            $aQuest[$id]['fill'][$number][] = $v;
+                        }
+                    }
+                }
+                else if($type == 3)
+                {
+                    # 填寫
+                    ($fill != '' && !empty($fill)) ? $aQuest[$id]['fill'][] = $fill : '';
+                }
+                else if($type == 4)
+                {
+                    # 多題單選
+                    foreach($select[0] as $sid => $number)
+                    {
+                        $number--;
+                        isset($aQuest[$id]['item'][$sid]['answer'][$number]) ? $aQuest[$id]['item'][$sid]['answer'][$number]++ : '';
+                    }
+                }
+            }
+        }
+
+        if(!empty($aQuest))
+        {
+            # 整理成回傳格式
+            foreach($aQuest as $id => $data)
+            {
+                $aTmp = array();
+                $type = $data['type'];
+                $aTmp['id'] = $id;
+                $aTmp['type'] = $type;
+                $aTmp['count'] = $data['count'];
+                
+                if($type == 1 || $type == 2)
+                {
+                    $aTmp['answer_count'] = $data['answer'];
+                    $aTmp['fill'] = array();
+                    foreach($data['fill'] as $number => $fill)
+                    {
+                        $aFill = array();
+                        if($fill != '' && !empty($fill))
+                        {
+                            $aFill[$number] = $fill;
+                            $aTmp['fill'][] = $aFill;
+                        };
+                    }
+                    !isset($aTmp['fill']) ? $aTmp['fill'] = array() : '';
+                }
+                else if($type == 3)
+                {
+                    $aTmp['fill'] = $data['fill'];
+                }
+                else if($type == 4)
+                {
+                    foreach($data['item'] as $sid => $sdata)
+                    {
+                        $aTmp['answer_count'][$sid] = $sdata['answer'];
+                    }
+                }
+
+                $ts = json_encode($aTmp,JSON_UNESCAPED_UNICODE);
+                $aRes['statistics'][] = $aTmp;
             }
         }
     }
-
-    if(!empty($aQuest))
+    else
     {
-        # 整理成回傳格式
-        foreach($aQuest as $id => $data)
-        {
-            $aTmp = array();
-            $type = $data['type'];
-            $aTmp['id'] = $id;
-            $aTmp['type'] = $type;
-            $aTmp['count'] = $data['count'];
-            
-            if($type == 1 || $type == 2)
-            {
-                $aTmp['answer_count'] = $data['answer'];
-                $aTmp['fill'] = array();
-                foreach($data['fill'] as $number => $fill)
-                {
-                    $aFill = array();
-                    if($fill != '' && !empty($fill))
-                    {
-                        $aFill[$number] = $fill;
-                        $aTmp['fill'][] = $aFill;
-                    };
-                }
-                !isset($aTmp['fill']) ? $aTmp['fill'] = array() : '';
-            }
-            else if($type == 3)
-            {
-                $aTmp['fill'] = $data['fill'];
-            }
-            else if($type == 4)
-            {
-                foreach($data['item'] as $sid => $sdata)
-                {
-                    $aTmp['answer_count'][$sid] = $sdata['answer'];
-                }
-            }
-
-            $ts = json_encode($aTmp,JSON_UNESCAPED_UNICODE);
-            $aRes['statistics'][] = $aTmp;
-        }
+        $nStatus = 99;
     }
 }
 catch(PDOException $e)
 {
-    cWriteLogFile::LogWrite(LOG_LEVEL['Error'],'資料庫異常->' . $e->getMessage(),$e->getCode(),$e->getLine());
+    error_log('資料庫異常: ' . $e->getMessage(),0,'./logs.log');
     $nStatus = 1002;
 }
 catch(Error $e)
 {
-    cWriteLogFile::LogWrite(LOG_LEVEL['Error'],'Error->' . $e->getMessage(),$e->getCode(),$e->getLine());
+    error_log($e->getMessage(),0,'./logs.log');
     $nStatus = 1000;
 }
 catch(Exception $e)
 {
-    cWriteLogFile::LogWrite(LOG_LEVEL['Info'],'Exception->' . $e->getMessage(),$e->getCode(),$e->getLine());
+    error_log($e->getMessage(),0,'./logs.log');
     $nStatus = $e->getCode();
 }
 catch(Throwable $e)
 {
-    cWriteLogFile::LogWrite(LOG_LEVEL['Warn'],'Throwable->' . $e->getMessage(),$e->getCode(),$e->getLine());
+    error_log($e->getMessage(),0,'./logs.log');
     $nStatus = 1000;
 }
 finally
