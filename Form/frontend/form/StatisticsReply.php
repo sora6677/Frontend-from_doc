@@ -16,7 +16,7 @@ cWriteLogFile::SetBaseSetting(basename(__FILE__,".php"),LOG_PATH);
 
 try
 {
-    $sDBHost = "127.0.0.1";
+    $sDBHost = "localhost";
     $sDBUser = "LiveRoad";
     $sDBPw = "asdXsd234";
     $sDBName = "liveroad";

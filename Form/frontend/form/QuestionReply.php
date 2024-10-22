@@ -35,7 +35,7 @@ try
 
     $_sReply = json_encode($_sReply,JSON_UNESCAPED_UNICODE);    
 
-    $sDBHost = "127.0.0.1";
+    $sDBHost = "localhost";
     $sDBUser = "LiveRoad";
     $sDBPw = "asdXsd234";
     $sDBName = "liveroad";
@@ -61,22 +61,22 @@ try
 }
 catch(PDOException $e)
 {
-    cWriteLogFile::LogWrite(LOG_LEVEL['Error'],'資料庫異常->' . $e->getMessage(),$e->getCode(),$e->getLine());
+    error_log('資料庫異常: ' . $e->getMessage(),0,'./logs.log');
     $nStatus = 1002;
 }
 catch(Error $e)
 {
-    cWriteLogFile::LogWrite(LOG_LEVEL['Error'],'Error->' . $e->getMessage(),$e->getCode(),$e->getLine());
+    error_log($e->getMessage(),0,'./logs.log');
     $nStatus = 1000;
 }
 catch(Exception $e)
 {
-    cWriteLogFile::LogWrite(LOG_LEVEL['Info'],'Exception->' . $e->getMessage(),$e->getCode(),$e->getLine());
+    error_log($e->getMessage(),0,'./logs.log');
     $nStatus = $e->getCode();
 }
 catch(Throwable $e)
 {
-    cWriteLogFile::LogWrite(LOG_LEVEL['Warn'],'Throwable->' . $e->getMessage(),$e->getCode(),$e->getLine());
+    error_log($e->getMessage(),0,'./logs.log');
     $nStatus = 1000;
 }
 finally
