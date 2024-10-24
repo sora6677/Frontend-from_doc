@@ -75,8 +75,7 @@ try
 
         # 查詢回覆
         $aData = array();
-        $sSQL ='SELECT  `reply_id`,
-                        `reply_data`
+        $sSQL ='SELECT  `reply_data`
                 FROM    `questionnaire_reply`
                 WHERE   `question_id` = 1';
         $sPre = $oDB->prepare($sSQL);
